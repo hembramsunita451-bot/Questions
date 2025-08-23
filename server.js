@@ -1,38 +1,38 @@
-const http = require('http')
-const url = require('url')
-const products = [
-    { id: 1, name: "Laptop", price: 67000 },
-    { id: 2, name: "Laptop", price: 67000 },
-    { id: 3, name: "Laptop", price: 67000 },
+const express = require("express");
+const app = express();
+const PORT = 6700;
+app.use(express.json());
+const data = [];
 
-];
-const newproduct = {id:4,name:"phone",price:78000}
-const updatedproduct = {...products,newproduct}
-
-const server = http.createServer((req, res) => {
-    res.writeHead(200,{'Content-Type':'application/json'});
-    const parsedurl = url.parse(req.url,true);
-    const pathname = parsedurl.pathname;
-    if(pathname === '/products'){
-        res.end(JSON.stringify(products));
-    } else if(pathname === '/updateproduct'){
-      res.end(JSON.stringify(updatedproduct));
-    } else if(pathname === '/product') {
-        const id = parseInt(parsedurl.query.id);
-        const product = products.find(p=>p.id === id);
-        if(product){
-            res.end(JSON.stringify(product)); 
-        }
-        else {
-          res.end(JSON.stringify({message:"product not found"}));   
-        } 
-    }   
-     else {
-        res.end(JSON.stringify({message:"product not found"}));
-    }
+//basic routing
+app.get('/',(req,res)=>{
+    res.json('home page');
+});
+//insert data
+app.post('/add',(req,res)=> {
+   const newuser = req.body;
+   newuser.id = data.length +1;
+    data.push(newuser);
+    res.json("user added successfully");
+});
+//view all data
+app.get('/users',(req,res)=>{
+    res.json(data);
+});
+//search query string
+app.get('/search',(req,res)=>{
+    const name = req.query.name;
+    const result = data.filter(user=>user.name.toLowerCase().includes(name.toLowerCase()));
+    res.json(result);
 
 });
-const port = 5600;
-server.listen(port, () => {
-    console.log('server is running port 5600');
+//get single data
+app.get('/user/:id',(req,res)=>{
+    const id = parseInt(req.params.id);
+    const user = data.find(x=>x.id=== id);
+    user ? res.json(user) :res.status(404).json("user not found");
+});
+
+app.listen(PORT, ()=>{
+    console.log("server is running port 6700");
 });
